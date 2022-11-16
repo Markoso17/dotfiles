@@ -1,0 +1,165 @@
+## GUIA DE ISNTALACION DE ARCH LINUX 
+
+Para pruebas 
+hostname: markosoPC
+pass-root: 12345thanos
+user: markoso17
+pass-user: 12345thanos  
+
+
+
+
+# cambia idioma del teclado 
+loadkeys la-latin1
+
+# configurar reloj
+timedatectl set-ntp true
+
+# Creat particiones con cfdisk GPT
+# 1 particion EFI de 550MB
+# 1 particion SWAP de 4GB
+# 1 particion RAIZ y HOME juntas 
+
+# Formatear particiones
+mkfs.fat -F32 /dev/sda1 (la EFI)
+mkswap /dev/sda2 (el swap)
+swapon /dev/sda2 (iniciar el swap)
+mkfs.ext4 /dev/sda3 (la raiz)
+
+# Montar la particion 
+mount /dev/sda3 /mnt 
+
+# Crear carpeta EFI
+mkdir /mnt/boot
+mkdir /mnt/boot/efi 
+
+# Montar la particion EFI
+mount /dev/sda1 /mnt/boot/efi
+
+# Instalar 
+pacstrap /mnt base base-devel linux linux-firmware nano grub efibootmgr 
+
+# Generar fstab
+genfstab /mnt >> /mnt/etc/fstab
+
+# Acceder al sistema instalado
+arch-chroot /mnt
+
+# Asignarle un nombre al pc
+echo markosoPC > /etc/hostname
+
+# Asignar los hosts
+nano /etc/hosts
+
+127.0.0.1            localhost
+::1                  localhost
+127.0.0.1            Archlinux.localdomain    Archlinux
+
+# Configurar Zona Horaria
+ln -sf /usr/share/zoneinfo/America/Guayaquil /etc/localtime
+
+# Configurar idioma
+nano /etc/locale.gen 
+descomentar:
+es_ES.UTF-8 UTF-8
+es_ES ISO-8859-1
+guardas y ejecutas locale-gen 
+
+# Configurar reloj
+hwclock -w
+
+# Configurar el teclado
+echo KEYMAP=es > /etc/vconsole.conf 
+echo LANG=es_ES.UTF8 > /etc/locale.conf 
+
+#Instalar GRUB 
+grub-install --efi-directory=/boot/efi --bootloader-id='Arch-Perron' --target=x86_64-efi 
+
+grub-mkconfig -o /boot/grub/grub.cfg 
+
+# Habilitar networkmanager
+pacman -S networkmanager
+systemctl enable NetworkManager 
+
+# Contraseña del root 
+passwd 
+
+# Agregar Usuarios
+useradd -m markoso17
+
+# Contraseña personal
+passwd markoso17 
+
+# Instalar SUDO
+pacman -S sudo 
+
+# Asignar mi usuario a el grupo wheel
+nano /etc/sudoers
+ubicar #User privilege specification 
+escribimos bajo root 
+markoso17 ALL=(ALL) ALL 
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# Salimos de la intalacion 
+exit
+
+# Desmontar 
+unmount -R /mnt 
+
+# Reinicie el sistema
+reboot now 
+
+# Iniciamos Sesion
+
+# Habilitar Servicio de red
+sudo systemctl start NetworkManager.service
+sudo systemctl enable NetworkManager.service
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+## PRE DEPENDENCIAS PARA ESCRITORIOS 
+
+# Actualizar sistema
+sudo pacman -Syu
+
+# Verificar tarjeta de mi maquina 
+lspci | grep -e VGA
+
+# Instalar xorg
+sudo pacman -S xorg xterm xorg-xinit
+
+# Instalar utilidades de la grafica 
+(virtualbox) sudo pacman -S virtualbox-guest-utils virtualbox-guest-dkms 
+
+(amd32) sudo pacman -S lib32-mesa vulkan-radeon lib32-vulkan-radeon vulkan-icd-loader lib32-vulkan-icd-loader
+
+
+
+
+
+(amd64) sudo pacman -S mesa vulkan-radeon vulkan-icd-loader
+xf86-video-amdgpu libva-mesa-driver mesa-vdpau amdgpu-pro-libgl 
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+## INSTALAR GNOME 
+
+# Actualizar el sistema
+sudo pacman -Syu 
+
+sudo pacman -S gnome gnome-extra --noconfirm 
+
+sudo pacman -S gdm
+sudo systemctl enable gdm.service
+
+1 2 6 9 11 12 14 15 17 18 19 20 21 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 - 61
+
+
+1 2 3 4 5 10 17 25 26 
+
+
+
+gnome-shell gnome-terminal gnome-tweak-tool gnome-control-center xdg-user-dirs gdm  --- gnome-keyring nautilus eog file-roller
